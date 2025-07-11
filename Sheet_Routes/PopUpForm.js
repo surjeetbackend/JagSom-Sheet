@@ -31,13 +31,13 @@ const appendToSheet = async (range, values) => {
 
 router.post('/popup', async (req, res) => {
   try {
-    const { name, phone, service } = req.body;
+    const { name, phone, email, service } = req.body;
 
-    if (!name || !phone || !service) {
+    if (!name || !phone || !service || !email) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    await appendToSheet('PopUpForm!A2:C', [name.trim(), phone.trim(), service.trim()]);
+    await appendToSheet('PopUpForm!A2:D', [name.trim(), phone.trim(), service.trim(), email.trim()]);
     res.status(200).json({ message: 'Contact saved successfully' });
   } catch (err) {
     console.error('❌ Google Sheets Error:', err.message);
