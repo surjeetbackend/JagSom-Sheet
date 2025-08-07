@@ -40,7 +40,7 @@ router.post('/c', async (req, res) => {
     await appendToSheet('ContactUs!A2:C', [name.trim(), phone.trim(), email.trim()]);
     res.status(200).json({ message: 'Contact saved successfully' });
   } catch (err) {
-    console.error('❌ Google Sheets Error:', err.message);
+    console.error(' Google Sheets Error:', err.message);
     res.status(500).json({ error: 'Error saving contact', details: err.message });
   }
 });

@@ -39,9 +39,9 @@ const appendToSheet = async (range, values) => {
 
 router.post('/popup', async (req, res) => {
   try {
-    const { name, phone, email, service } = req.body;
+    const { name, phone, email, service, message } = req.body;
 
-    if (!name || !phone || !service || !email) {
+    if (!name || !phone || !service || !email || !message) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
@@ -56,7 +56,8 @@ router.post('/popup', async (req, res) => {
       name.trim(),             
       phone.trim(),
       email.trim(),             
-      serviceList.trim(),      
+      serviceList.trim(), 
+      message.trim()     
                  
     ]);
 
@@ -65,7 +66,7 @@ router.post('/popup', async (req, res) => {
       quotationNumber
     });
   } catch (err) {
-    console.error('❌ Google Sheets Error:', err.message);
+    console.error(' Google Sheets Error:', err.message);
     res.status(500).json({
       error: 'Error saving contact',
       details: err.message
