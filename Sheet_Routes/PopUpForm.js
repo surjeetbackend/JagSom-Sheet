@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const { google } = require('googleapis');
-
-console.log("📦 Contactus route loaded");
+const Counter = require('../model/Counter');
+const PopupContact = require('../model/PopupContact'); 
+console.log("📦 PopUpForm route loaded");
 
 const auth = new google.auth.GoogleAuth({
   credentials: {
@@ -15,12 +16,19 @@ const auth = new google.auth.GoogleAuth({
 const SHEET_ID = process.env.GOOGLE_SHEET_ID;
 
 
-const generateQuotationNumber = () => {
+const generateQuotationNumber = async () => {
   const now = new Date();
   const year = now.getFullYear().toString().slice(-2);
   const month = String(now.getMonth() + 1).padStart(2, '0');
-  const random = Math.floor(1000 + Math.random() * 9000);
-  return `${year}${month}${random}`;
+
+  const counter = await Counter.findOneAndUpdate(
+    { name: 'quotation' },
+    { $inc: { seq: 1 } },
+    { new: true, upsert: true }
+  );
+
+  const number = String(counter.seq).padStart(4, '1000');
+  return `${year}${month}${number}`;
 };
 
 
@@ -41,7 +49,7 @@ router.post('/popup', async (req, res) => {
   try {
     const { name, phone, email, service, message } = req.body;
 
-    if (!name || !phone || !service || !email || !message) {
+    if (!name || !phone || !email || !service || !message) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
@@ -49,29 +57,44 @@ router.post('/popup', async (req, res) => {
       ? service.join(', ')
       : service;
 
-    const quotationNumber = generateQuotationNumber();
+    const quotationNumber = await generateQuotationNumber(); 
 
-    await appendToSheet('PopUpForm!A2:E', [
-      quotationNumber,         
-      name.trim(),             
+
+    const newContact = new PopupContact({
+      quotationNumber,
+      name: name.trim(),
+      phone: phone.trim(),
+      email: email.trim(),
+      service: serviceList.trim(),
+      message: message.trim(),
+    });
+
+    await newContact.save();
+
+    await appendToSheet('PopUpForm!A2:F', [
+      quotationNumber,
+      name.trim(),
       phone.trim(),
-      email.trim(),             
-      serviceList.trim(), 
-      message.trim()     
-                 
+      email.trim(),
+      serviceList.trim(),
+      message.trim()
     ]);
 
     res.status(200).json({
       message: 'Contact saved successfully',
       quotationNumber
     });
+
   } catch (err) {
-    console.error(' Google Sheets Error:', err.message);
+    console.error('❌ Error saving contact:', err.message);
     res.status(500).json({
       error: 'Error saving contact',
       details: err.message
     });
   }
 });
+
+
+
 
 module.exports = router;
