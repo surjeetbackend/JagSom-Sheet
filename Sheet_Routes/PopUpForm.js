@@ -4,7 +4,7 @@ const { google } = require('googleapis');
 const Counter = require('../model/Counter');
 const PopupContact = require('../model/PopupContact'); 
 console.log("📦 PopUpForm route loaded");
-
+const sendEmail = require("../util/mail");
 const auth = new google.auth.GoogleAuth({
   credentials: {
     client_email: process.env.GOOGLE_SERVICE_EMAIL,
@@ -79,14 +79,36 @@ router.post('/popup', async (req, res) => {
       serviceList.trim(),
       message.trim()
     ]);
+     const emailContent = `
+      <h2>Inquiry Confirmation - ${quotationNumber}</h2>
+      <p>Hello ${name},</p>
+      <p>Thank you for reaching out to us. Here are the details of your inquiry:</p>
+      <ul>
+        <li><strong>Service:</strong> ${serviceList}</li>
+        <li><strong>Message:</strong> ${message}</li>
+        <li><strong>Phone:</strong> ${phone}</li>
+        <li><strong>Email:</strong> ${email}</li>
+      </ul>
+      <p><strong>Date:</strong> ${new Date().toLocaleString()}</p>
+
+      <p>Our team will contact you shortly.  
+      If you have any questions, please call:  8178150910, 7821939453</p>
+    `;
+
+    await sendEmail(
+      email,
+      `Your Inquiry Confirmation - ${quotationNumber}`,
+      emailContent
+    );
 
     res.status(200).json({
-      message: 'Contact saved successfully',
+      message: 'Contact saved & email sent successfully',
       quotationNumber
     });
 
+
   } catch (err) {
-    console.error('❌ Error saving contact:', err.message);
+    console.error('Error saving contact:', err.message);
     res.status(500).json({
       error: 'Error saving contact',
       details: err.message
