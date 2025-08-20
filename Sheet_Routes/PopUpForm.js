@@ -104,7 +104,7 @@ const formattedTime = `${dateParts.hour}:${dateParts.minute}:${dateParts.second}
 
 
       const emailContent = `
-      <h2>Enquiry Confirmation - ${quotationNumber}</h2>
+      <h2>Quotation Number  - ${quotationNumber}</h2>
       <p>Hello ${name},</p>
       <p>Thank you for reaching out to us. Here are the details of your Enquiry:</p>
       <ul>
