@@ -79,25 +79,50 @@ router.post('/popup', async (req, res) => {
       serviceList.trim(),
       message.trim()
     ]);
-     const emailContent = `
-      <h2>Inquiry Confirmation - ${quotationNumber}</h2>
+       
+
+const now = new Date(); 
+
+const istDateTime = new Intl.DateTimeFormat('en-IN', {
+  timeZone: 'Asia/Kolkata',
+  day: '2-digit',
+  month: '2-digit',
+  year: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+  second: '2-digit',
+  hour12: true, 
+}).formatToParts(now);
+
+let dateParts = {};
+istDateTime.forEach(({ type, value }) => {
+  dateParts[type] = value;
+});
+
+const formattedDate = `${dateParts.day}/${dateParts.month}/${dateParts.year}`;
+const formattedTime = `${dateParts.hour}:${dateParts.minute}:${dateParts.second} ${dateParts.dayPeriod}`;
+
+
+      const emailContent = `
+      <h2>Enquiry Confirmation - ${quotationNumber}</h2>
       <p>Hello ${name},</p>
-      <p>Thank you for reaching out to us. Here are the details of your inquiry:</p>
+      <p>Thank you for reaching out to us. Here are the details of your Enquiry:</p>
       <ul>
         <li><strong>Service:</strong> ${serviceList}</li>
         <li><strong>Message:</strong> ${message}</li>
         <li><strong>Phone:</strong> ${phone}</li>
         <li><strong>Email:</strong> ${email}</li>
       </ul>
-      <p><strong>Date:</strong> ${new Date().toLocaleString()}</p>
+      <p><strong>Date:</strong> ${formattedDate}</p>
+      <p><strong>Time:</strong> ${formattedTime}</p>
 
       <p>Our team will contact you shortly.  
-      If you have any questions, please call:  8178150910, 7821939453</p>
+      If you have any questions, please call: 8178150910, 7821939453</p>
     `;
 
     await sendEmail(
       email,
-      `Your Inquiry Confirmation - ${quotationNumber}`,
+      `Your Enquiry Confirmation - ${quotationNumber}`,
       emailContent
     );
 
